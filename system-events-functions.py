@@ -4,7 +4,13 @@ class temporaryName:
     """temporary class docstring"""
     
     def function_one():
-        """temporary docstring - name"""
+        """This is Shemar's function meant to do something in some way"""
+        
+        x = 1
+        y = 2
+        z = x + y
+        
+        
         pass
 
     def function_two():
