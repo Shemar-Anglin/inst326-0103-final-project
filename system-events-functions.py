@@ -37,5 +37,6 @@ class temporaryName:
         pass
 
     def function_five():
-        """temporary docstring - name"""
-        pass
+        """This is Christie's function."""
+        
+        temp_dict = {}
