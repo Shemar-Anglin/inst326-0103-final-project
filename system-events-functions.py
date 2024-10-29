@@ -23,7 +23,13 @@ class temporaryName:
         pass
 
     def function_three():
-        """temporary docstring - name"""
+        """This is Neha's function
+        
+        Side effects:
+        
+        Returns:
+        """
+        abc = "123"
         pass
         
     def function_four():
