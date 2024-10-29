@@ -33,7 +33,12 @@ class temporaryName:
         pass
         
     def function_four():
-        """temporary docstring - name"""
+        """ This function is Stephany's and what is does is calculate the number of events.
+        Args:
+            It does sosmething
+        Returns:
+            an integer
+        """
         pass
 
     def function_five():
