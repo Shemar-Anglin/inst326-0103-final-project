@@ -13,8 +13,13 @@ class temporaryName:
         
         pass
 
-    def function_two():
-        """temporary docstring - name"""
+    def summary(self):
+        """ Cam's function allows users to see a summary of events that can be customized.
+        Args:
+            coming soon...
+        Side effects:
+            prints user's customized summary into the console.
+        """
         pass
 
     def function_three():
