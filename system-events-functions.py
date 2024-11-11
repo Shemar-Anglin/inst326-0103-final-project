@@ -1,7 +1,7 @@
 import re
 import random
-import argsparse
-
+from argparse import ArgumentParser
+import sys
 
 class temporaryName:
     """temporary class docstring"""
@@ -239,14 +239,90 @@ class temporaryName:
             
         pass
 
-    def summary(self):
-        """ Cam's function allows users to see a summary of events that can be customized.
+    def summary(path):   
+        """ Displays a general summary then the user chooses a review of an event 
+        type or a specific date to display events.
         Args:
-            coming soon...
+            path(string): A path to the text file of event logs
         Side effects:
-            prints user's customized summary into the console.
+            prints general summary, review, and time frames into the console.
         """
-        pass
+        events = ["Update", "Files", "Error", "Warning", "Security"]
+        general_summ = {event: 0 for event in events}
+        options = ["Review", "Time"]
+    
+        with open(path, "r", encoding = "utf-8") as file:
+            log_lines = [line.strip() for line in file]
+            for line in log_lines:
+                for event in events:
+                    if event in line:
+                        general_summ[event] += 1
+  
+        for event, num in general_summ.items():
+            print(f"{event}: {num}")
+    
+        q1 = input("Enter an option (Review, Time): ")
+
+        if q1 not in options:
+            print("Not an option")
+            return
+
+        if q1 == options[0]:
+            q2 = input("Enter an event-type (Update, Files, Error, Warning, Security): ")
+
+            if q2 not in events:
+                print("Not an event type")
+                return
+        
+            print(f"\nResults for {q1} - {q2}")
+            for line in log_lines:
+                if q2 in line:
+                    print(line)
+                
+        if q1 == options[1]:
+            m = [i for i in range(1,13)]
+            d =  [i for i in range(1,32)]
+
+            q3 = input("Enter a month (1-12): ")
+            q3_int = int(q3)
+            if q3_int not in m:
+                print("Invalid month")
+                return
+        
+            q4 = input("Enter a day (1-31): ")
+            q4_int = int(q4)
+            if q4_int not in d:
+                print("Invalid day")
+                return
+            
+            print(f"\nEvents from this date: {q3_int}-{q4_int}")
+            for line in log_lines:
+                date = line.split(" ")[0]
+                month = date.split("-")[1]
+                month_int = int(month)
+                day = date.split("-")[2]
+                day_int = int(day)
+                if month_int == q3_int and day_int == q4_int:
+                    print(line)
+                
+    def parse_args(arglist):
+        """ Processes command line arguments. 
+        Args:
+            arglist (list of str): arguments from the command line.
+    
+        Returns:
+            namespace: the parsed arguments, as a namespace.
+        """
+        parser = ArgumentParser()
+        parser.add_argument("file", help="file containing the event logs")
+        args = parser.parse_args(arglist)
+        return args
+
+
+    if __name__ == "__main__":
+        args = parse_args(sys.argv[1:])
+        summary(args.file)
+             
 
     def extract_date_time(file_path):
         """
@@ -322,6 +398,9 @@ class temporaryName:
     significant_patterns = {pattern: count for pattern, count in warning_patterns.items() if count > 1}
     return significant_patterns
 
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Identify recurring warning patterns in a log file.")
     parser.add_argument("log_file", type=str, help="Path to the log file")
@@ -341,3 +420,4 @@ if __name__ == "__main__":
         """This is Christie's function."""
         
         temp_dict = {}
+
