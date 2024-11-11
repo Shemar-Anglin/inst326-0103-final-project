@@ -248,15 +248,44 @@ class temporaryName:
         """
         pass
 
-    def function_three():
-        """This is Neha's function
+    def extract_date_time(file_path):
+        """
+        Extracts the date and time from each event entry in a system event file
         
-        Side effects:
+        Args: 
+        file_path(str): The path to the system event file
         
         Returns:
+        list of tuples: A list where each element is a tuple that contains
+            the date and time of a system event
+            
+        Raises:
+        FileNotFoundError: If the file cannot be found
+        Exception: If an error happens during reading of the file or processing
+        
         """
-        abc = "123"
-        pass
+        regex = r'(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})'
+        extracted_dates_times = []
+        
+        try:
+            with open(file_path, 'r') as f: 
+                for line in f:
+                    matches = re.findall(regex,line)
+                    if matches:
+                        for match in matches:
+                            date_time = match. split()
+                            date = date_time[0]
+                            time = date_time[1]
+                            extracted_dates_times.append ((date, time))
+        except FileNotFoundError:
+            raise FileNotFoundError("The file is not found")
+        except Exception:
+            raise Exception ("There is an error")
+        return extracted_dates_times
+
+                            
+                            
+                    
         
     def function_four():
         """ This function is Stephany's and what is does is calculate the number of events.
