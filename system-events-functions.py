@@ -239,17 +239,18 @@ class temporaryName:
             
         pass
 
-    def summary(path):   
-        """ Displays a general summary then the user chooses a review of an event 
-        type or a specific date to display events.
+
+    def summary (path):
+        """ Displays a dictionary of the number of events then the user chooses a 
+        review of an event type or a specific date to display events.
         Args:
             path(string): A path to the text file of event logs
         Side effects:
-            prints general summary, review, and time frames into the console.
+            prints dictionary, review, and time frames into the console.
         """
         events = ["Update", "Files", "Error", "Warning", "Security"]
         general_summ = {event: 0 for event in events}
-        options = ["Review", "Time"]
+        options = ["Review", "Time Frame"]
     
         with open(path, "r", encoding = "utf-8") as file:
             log_lines = [line.strip() for line in file]
@@ -261,7 +262,7 @@ class temporaryName:
         for event, num in general_summ.items():
             print(f"{event}: {num}")
     
-        q1 = input("Enter an option (Review, Time): ")
+        q1 = input("Enter a summary option (Review, Time Frame): ")
 
         if q1 not in options:
             print("Not an option")
