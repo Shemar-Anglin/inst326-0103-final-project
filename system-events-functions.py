@@ -248,41 +248,184 @@ class temporaryName:
         """
         pass
 
-    def extract_date_time(file_path):
+    def extract_date_time(self, file_path):
         """
         Extracts the date and time from each event entry in a system event file
-        
+
         Args: 
-        file_path(str): The path to the system event file
+            file_path(str): The path to the system event file
         
         Returns:
-        list of tuples: A list where each element is a tuple that contains
-            the date and time of a system event
-            
-        Raises:
-        FileNotFoundError: If the file cannot be found
-        Exception: If an error happens during reading of the file or processing
+            list of tuples: A list where each element is a tuple that contains
+                the date and time of a system event
         
+        Raises:
+            FileNotFoundError: If the file cannot be found.
+            Exception: If an error happens during reading of the file or 
+                processing
+        
+         Side Effects:
+            Prints the extracted dates and times to the console in the format:
+                "Extracted Dates and Times:" outputs a list of (Date, Time) 
+                tuples
         """
         regex = r'(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})'
         extracted_dates_times = []
-        
+
         try:
-            with open(file_path, 'r') as f: 
+            with open(file_path, 'r', encoding="utf-8") as f: 
                 for line in f:
-                    matches = re.findall(regex,line)
+                    matches = re.findall(regex, line)
                     if matches:
                         for match in matches:
-                            date_time = match. split()
+                            date_time = match.split()
                             date = date_time[0]
                             time = date_time[1]
-                            extracted_dates_times.append ((date, time))
+                            extracted_dates_times.append((date, time))
         except FileNotFoundError:
-            raise FileNotFoundError("The file is not found")
+            raise FileNotFoundError("The file is not found.")
         except Exception:
-            raise Exception ("There is an error")
+            raise Exception("There is an error.")
+    
+        print("Extracted Dates and Times:")
+        for date, time in extracted_dates_times:
+            print(f"(Date: {date}, Time: {time})")
+    
         return extracted_dates_times
 
+    
+    def keyword_search(self, file_path):
+        """
+        Allows users to search for and view specific event types from 
+        the txt file. This function prompts the user to input an event type 
+        (e.g., Error, Warning) and a required keyword to filter event 
+        descriptions. Then processes the file to display matching events with 
+        their details, such as the date, event type, event ID, and description.
+        It also tracks and displays events and keywords previously 
+        viewed during the session.
+
+        Args:
+            file_path (str): Path to the txt file that contains system events.
+
+        Side effects:  
+            - Prompts the user for input (event type and keyword).
+            - Reads and processes the log file to find matching events.
+            - Prints matching event details (search results) to the console, 
+              including event date, type, ID, and description.
+            - Prints error messages to the console if the file is not found 
+              or if an unexpected error occurs.
+            - Prints previously searched keywords and events if the user opts 
+              to view them.
+            - Prints confirmation messages when an event is found or if no 
+                events match the search criteria.
+            - Prints instructions to the console to guide the user.
+        
+        Raises:
+            FileNotFoundError: If the file is not found.
+            Exception: If any other unexpected error occurs 
+        """
+        event_history = []  
+        keyword_history = []  
+
+        # Instructions for the user
+        print("Welcome to keyword search. Please follow the prompts to search "
+              "for specific event types and descriptions.")
+        print(
+    "You are required to enter a keyword to filter event descriptions.")
+        print("Examples of keywords: 'saved', 'deleted', 'CPU', 'Game', "
+              "'presentation'.")
+        print("You also have the option to view previously searched events and"
+              " keywords during the session.")
+
+        while True:
+            try:
+                # Ask the user what kind of event they want to search for
+                event_type = input(
+                    "Enter the event type you want to search for "
+                    "(e.g., Error, Update, Warning, Security, Files): "
+                ).strip()
+
+                # Ask the user for a keyword 
+                while True:
+                    keyword = input(
+    "Enter keyword to filter descriptions:"
+).strip()
+                    if keyword:
+                        break
+                    else:
+                        print("Keyword is required. Enter a valid keyword.")
+                
+                # Add the keyword to keyword history (avoid duplicates)
+                if keyword not in keyword_history:
+                    keyword_history.append(keyword)
+
+                with open(file_path, 'r') as file:
+                    event_found = False
+                    print("\nSearch Results:")
+
+                    for line in file:
+                        parts = line.split('|')
+                        
+                        if (
+                            len(parts) > 3 
+                            and event_type.lower() in parts[1].strip().lower()
+                        ):
+                            # Extract the event details
+                            date_time = parts[0].strip()  
+                            event = parts[1].strip()  
+                            event_id = parts[2].strip() 
+                            description = parts[3].strip()  
+                            
+                            if keyword.lower() not in description.lower():
+                                continue
+                            event_details = (
+    f"{date_time} | {event} | {event_id} | {description}"
+)
+                            # Print the matching event
+                            print(f"\n{event_details}")
+                            event_found = True
+                            
+                            # Add the event to the event history
+                            if event_details not in event_history:
+                                event_history.append(event_details)
+                    print(
+    "\nNo events found matching." if not event_found else ""
+)
+
+                # Ask the user if they want to see 
+                # previously searched events and keywords
+                view_history = input(
+    "\nDo you want to view previously searched events and keywords? (yes/no): "
+).strip().lower()
+                if view_history == 'yes':
+                    if keyword_history:
+                        print("\nPreviously Searched Keywords:")
+                        print(", ".join(keyword_history))
+                    else:
+                        print("\nNo previously searched keywords found")
+                    
+                    if event_history:
+                        print("\nPreviously Viewed Events:")
+                        for event in event_history:
+                            print(event)
+                    else:
+                        print("\nNo previously viewed events found")
+                    
+
+                # Ask the user if they want to search again or exit
+                continue_search = input(
+                    "\nDo you want to search again? (yes/no): "
+                ).strip().lower()
+                if continue_search != 'yes':
+                    print("Exiting search.")
+                    break
+            
+            except FileNotFoundError:
+                print(f"Error: The file '{file_path}' was not found.")
+                break  
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                break  
                             
                             
                     
