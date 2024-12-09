@@ -1,12 +1,12 @@
 import re
-import random
-import argsparse
+import pandas as pd
+from argparse import ArgumentParser
+import sys
 
-
-class temporaryName:
+class SystemEventsManager:
     """temporary class docstring"""
     
-    def manage_system_events(file_path, change_log_file=None):
+    def manage_system_events(self, file_path, change_log_file=None):
         """Manages system events through a series of nested functions that allow
         users to add events, and records the changes in a log.
 
@@ -34,18 +34,13 @@ class temporaryName:
         
         event_categories = {
             "Error":["Represents errors that occur on the system.",
-                    "EX: Appllication \"XYX\" failed to start"
-            ],
+                    "EX: Appllication \"XYX\" failed to start"],
             "Warning":["Indicates warning conditions.",
-                    "EX: Temperature warning: CPU overheating."
-                
-            ],
+                    "EX: Temperature warning: CPU overheating."],
             "Update":["Represents instances of updates made on the system.",
-                    "EX: Driver update for graphics card completed"
-            ],
+                    "EX: Driver update for graphics card completed"],
             "Security":["Security events that occured on the system",
-                        "EX: Unauthorized login attempt"   
-            ]
+                        "EX: Unauthorized login attempt"]
         }
         
         def get_last_event_information():
@@ -202,7 +197,7 @@ class temporaryName:
                 )
                 
                 with open(file_path, 'a') as file:
-                    file.write(new_event + "\n")
+                    file.write("\n" + new_event)
                 print("SUCCESS! The event has been added\n")
                 
                 change_log_record(
@@ -239,15 +234,101 @@ class temporaryName:
             
         pass
 
-    def summary(self):
-        """ Cam's function allows users to see a summary of events that can be customized.
-        Args:
-            coming soon...
-        Side effects:
-            prints user's customized summary into the console.
-        """
-        pass
 
+    def summary (path):
+        """ Displays a dictionary of the number of events then the user chooses 
+        a review of an event type or a specific date to display events.
+        Args:
+            path(string): A path to the text file of event logs
+        Side effects:
+            prints dictionary, review, and time frames into the console.
+        """
+        events = ["Update", "Files", "Error", "Warning", "Security"]
+        general_summ = {event: 0 for event in events}
+        options = ["Review", "Time Frame"]
+    
+        with open(path, "r", encoding = "utf-8") as file:
+            log_lines = [line.strip() for line in file]
+            for line in log_lines:
+                for event in events:
+                    if event in line:
+                        general_summ[event] += 1
+  
+        for event, num in general_summ.items():
+            print(f"{event}: {num}")
+    
+        q1 = input("Enter a summary option (Review, Time Frame): ")
+
+        if q1 not in options:
+            print("Not an option")
+            return
+
+        if q1 == options[0]:
+            q2 = input("Enter an event-type (Update, Files, Error, Warning, Security): ")
+
+            if q2 not in events:
+                print("Not an event type")
+                return
+        
+            print(f"\nResults for {q1} - {q2}")
+            for line in log_lines:
+                if q2 in line:
+                    print(line)
+                
+        if q1 == options[1]:
+            m = [i for i in range(1,13)]
+            d =  [i for i in range(1,32)]
+
+            q3 = input("Enter a month (1-12): ")
+            q3_int = int(q3)
+            if q3_int not in m:
+                print("Invalid month")
+                return
+        
+            q4 = input("Enter a day (1-31): ")
+            q4_int = int(q4)
+            if q4_int not in d:
+                print("Invalid day")
+                return
+            
+            print(f"\nEvents from this date: {q3_int}-{q4_int}")
+            for line in log_lines:
+                date = line.split(" ")[0]
+                month = date.split("-")[1]
+                month_int = int(month)
+                day = date.split("-")[2]
+                day_int = int(day)
+                if month_int == q3_int and day_int == q4_int:
+                    print(line)
+                
+  
+             
+    def activity(self, path, histogram=True):
+        """ Displays a histogram showing each month's activity or optionally
+        shows the data frame.
+        Args:
+            path(string): A path to the file.
+            histogram (boolean): optional data frame that shows which month
+            is assigned to each row.
+        Returns:
+            A histogram or data frame
+        """
+        month_count = []
+        with open(path, "r", encoding = "utf-8") as file:
+            for events in file:
+                line = events.split(" | ")
+                date_time = line[0].split(" ")[0]
+                month = int(date_time.split("-")[1])
+                month_count.append(month)
+        month_dict = {"month_count": month_count}
+        df = pd.DataFrame(month_dict)
+
+        if histogram == True:
+            return df.hist("month_count")
+        else:
+            return df
+    
+    
     def extract_date_time(self, file_path):
         """
         Extracts the date and time from each event entry in a system event file
@@ -465,6 +546,9 @@ class temporaryName:
     significant_patterns = {pattern: count for pattern, count in warning_patterns.items() if count > 1}
     return significant_patterns
 
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Identify recurring warning patterns in a log file.")
     parser.add_argument("log_file", type=str, help="Path to the log file")
@@ -480,7 +564,108 @@ if __name__ == "__main__":
 
         
 
-    def function_five():
-        """This is Christie's function."""
+    def event_sequence(file_path):
+        """A function to find the most common order of system events within the
+        txt file.  
         
-        temp_dict = {}
+        Args: 
+            file_path (str): name of the file that will be read to get the
+                system events information for. 
+        
+        Returns:
+            The top three most common sequences of events as strings. 
+                Format: 
+                "Top 3 most common sequences:"
+                "event1, event2, event3"
+                "event6, event3, event2"
+                "event1, event2"
+        
+        Side effects: 
+            Adds/modifies the keys and values of "count" dictionary (mutable)
+                when seeing what sequences of events have occurred.  
+        """
+        
+        # will include all the event descriptions/entries within the file to be
+        # sorted afterwards
+        entire_descriptions = []
+
+        with open(file_path, "r", encoding="utf-8") as f: 
+            regex = r"[^|]+(?=\s*$)"
+            
+            for line in f:
+                # getting only the event description from the lines using the
+                    # regular expression above
+                matches = re.search(regex, line)
+                
+                # if matches the filtering criteria (meaning is the "event
+                    # description")
+                if matches: 
+                    for match in matches: 
+                        # get rid of whitespace from before first word of
+                            # description starts
+                        event_desc = match.strip()
+
+                # adding event descriptions from each line to list that will
+                    # hold all descriptions
+                entire_descriptions.append(event_desc)
+                
+                    
+        # count dictionary will keep track of how many times a certain sequence
+            # appears in the following format:
+            # sequence of events: number of times sequence has occured
+            # {event 1, event 2, event 3: 4}
+        count = {}
+        
+        # need to figure out what sequences exist within the file 
+        
+        # goes through each event description
+        for event_desc in entire_descriptions:
+             
+
+            
+            
+            
+            
+            
+            
+            
+            # if that sequence does not exist yet as a key, then add 1 to the 
+                # current number of occurences
+                # (eg: if "event1, event 2" is not a key)
+            if individual_sequence in count:
+            # if that sequence does exist already as a key, then add 1 to the 
+                # current number of occurences
+                count[individual_sequence] += 1
+            # if the sequence does not exist as a key yet, set the number of
+            # times it has occured to one (initalizes it)
+            else: 
+                count[individual_sequence] = 1
+            
+        # figuring out what are the most common sequences
+                
+        # sort sequences according to whichever ones have the highest number of 
+            # occurences; list most common sequences at the top 
+        ordered_sequences = sorted(max(individual_sequence), reverse = True)
+        
+        # getting the top three most common ones using slicing; gets everything
+            # before the third index (meaning before the fourth most common
+            # sequence, since ordered_sequences is going from highest occurrences
+            # at the top of the list to lowest number of occurrences)
+        most_common_sequences = ordered_sequences[:3]
+        
+        
+        result_heading = ("Top 3 most common sequences:" + "\n")
+        
+        # creating empty string for all sequences to go into
+        result_content = ""
+        
+        for individual_sequence in most_common_sequences:
+            # if not all the top 3 sequences have been added, add a new line
+                # before the next sequence
+            if individual_sequence < 3:
+                result_content.append(individual_sequence + "\n")
+            else:
+                # add last sequence
+                result_content.append(individual_sequence)
+                
+        return result_heading, result_content
