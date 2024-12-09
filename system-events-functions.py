@@ -1,9 +1,8 @@
 import re
-import random
 from argparse import ArgumentParser
 import sys
 
-class temporaryName:
+class SystemEventsManager:
     """temporary class docstring"""
     
     def manage_system_events(file_path, change_log_file=None):
