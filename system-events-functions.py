@@ -17,7 +17,7 @@ class SystemEventsManager:
                 are recorded. Default is None.
         Nested Functions:
             get_last_event_information: Retrieves the details of the last event
-                from theevents txt file.
+                from the events txt file.
             format_given_date_and_time: changes date and time into a standard
                 format.
             change_log_record: records the changes that are made and is saved in 
@@ -236,7 +236,7 @@ class SystemEventsManager:
         pass
 
 
-    def summary (path):
+    def summary (self, path):
         """ Displays a dictionary of the number of events then the user chooses 
         a review of an event type or a specific date to display events.
         Args:
@@ -330,7 +330,7 @@ class SystemEventsManager:
             return df
     
     
-    def extract_date_time(file_path):
+    def extract_date_time(self, file_path):
         """
         Extracts the date and time from each event entry in a system event file.
 
