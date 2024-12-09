@@ -391,15 +391,13 @@ class SystemEventsManager:
 
         Side effects:  
             - Prompts the user for input (event type and keyword).
-            - Reads and processes the log file to find matching events.
+            - Reads and processes the file to find matching events.
             - Prints matching event details (search results) to the console, 
               including event date, type, ID, and description.
             - Prints error messages to the console if the file is not found 
               or if an unexpected error occurs.
-            - Prints previously searched keywords and events if the user opts 
+            - Prints previously searched keywords and events if the user wants 
               to view them.
-            - Prints confirmation messages when an event is found or if no 
-                events match the search criteria.
             - Prints instructions to the console to guide the user.
         
         Raises:
