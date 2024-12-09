@@ -2,8 +2,8 @@ import re
 from argparse import ArgumentParser
 import sys
 
-class temporaryName:
-    # """temporary class docstring"""
+class SystemEventsManager:
+    """temporary class docstring"""
     
     def manage_system_events(file_path, change_log_file=None):
         """Manages system events through a series of nested functions that allow
@@ -236,19 +236,21 @@ class temporaryName:
                 print(e)
             
             
+        pass
+
+
     def summary (path):
         """ Displays a dictionary of the number of events then the user chooses a 
         review of an event type or a specific date to display events.
         Args:
             path(string): A path to the text file of event logs
         Side effects:
-            prints general summary, review, and time frames into the console.
             prints dictionary, review, and time frames into the console.
         """
         events = ["Update", "Files", "Error", "Warning", "Security"]
         general_summ = {event: 0 for event in events}
         options = ["Review", "Time Frame"]
-
+    
         with open(path, "r", encoding = "utf-8") as file:
             log_lines = [line.strip() for line in file]
             for line in log_lines:
