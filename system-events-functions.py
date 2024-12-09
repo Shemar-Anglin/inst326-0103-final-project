@@ -1,4 +1,5 @@
 import re
+import pandas as pd
 from argparse import ArgumentParser
 import sys
 
@@ -240,8 +241,8 @@ class SystemEventsManager:
 
 
     def summary (path):
-        """ Displays a dictionary of the number of events then the user chooses a 
-        review of an event type or a specific date to display events.
+        """ Displays a dictionary of the number of events then the user chooses 
+        a review of an event type or a specific date to display events.
         Args:
             path(string): A path to the text file of event logs
         Side effects:
@@ -322,8 +323,34 @@ class SystemEventsManager:
     if __name__ == "__main__":
         args = parse_args(sys.argv[1:])
         summary(args.file)
+        
              
+    def activity(path, histogram=True):
+        """ Displays a histogram showing each month's activity or optionally
+        shows the data frame.
+        Args:
+            path(string): A path to the file.
+            histogram (boolean): optional data frame that shows which month
+            is assigned to each row.
+        Returns:
+            A histogram or data frame
+        """
+        month_count = []
+        with open(path, "r", encoding = "utf-8") as file:
+            for events in file:
+                line = events.split(" | ")
+                date_time = line[0].split(" ")[0]
+                month = int(date_time.split("-")[1])
+                month_count.append(month)
+        month_dict = {"month_count": month_count}
+        df = pd.DataFrame(month_dict)
 
+        if histogram == True:
+            return df.hist("month_count")
+        else:
+            return df
+    
+    
     def extract_date_time(file_path):
         """
         Extracts the date and time from each event entry in a system event file
