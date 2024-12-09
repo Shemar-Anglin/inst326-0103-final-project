@@ -3,9 +3,10 @@ from argparse import ArgumentParser
 import sys
 
 class SystemEventsManager:
-    """temporary class docstring"""
+
+    # NEED TO REMEMBER TO ADD SELF AS PARAMETERS TO ALL FUNCTIONS IN ORDER FOR MAIN MENU FUNCTION TO WORK
     
-    def manage_system_events(file_path, change_log_file=None):
+    def manage_system_events(self, file_path, change_log_file=None):
         """Manages system events through a series of nested functions that allow
         users to add events, and records the changes in a log.
 
@@ -234,23 +235,21 @@ class SystemEventsManager:
                     break
             except ValueError as e:
                 print(e)
-            
-            
-        pass
 
-
-    def summary (path):
+    
+    def summary(self, path):
         """ Displays a dictionary of the number of events then the user chooses a 
         review of an event type or a specific date to display events.
         Args:
             path(string): A path to the text file of event logs
         Side effects:
+            prints general summary, review, and time frames into the console.
             prints dictionary, review, and time frames into the console.
         """
         events = ["Update", "Files", "Error", "Warning", "Security"]
         general_summ = {event: 0 for event in events}
         options = ["Review", "Time Frame"]
-    
+
         with open(path, "r", encoding = "utf-8") as file:
             log_lines = [line.strip() for line in file]
             for line in log_lines:
@@ -318,12 +317,13 @@ class SystemEventsManager:
         args = parser.parse_args(arglist)
         return args
         
-             
-    if __name__ == "__main__":
-        args = parse_args(sys.argv[1:])
-        summary(args.file)
+    
         
-        
+    # removed if name == main for summary function bc was source of errors
+    
+    
+    
+
     def extract_date_time(self, file_path):
         """
         Extracts the date and time from each event entry in a system event file.
@@ -367,6 +367,66 @@ class SystemEventsManager:
 
         return extracted_dates_times
 
+    
+    def id_warning_patterns(self, file_path, pattern_length=3):
+        """  
+        Identifies patterns of warning events in the log file.
+    
+        Parameters:
+            file_path (str): Path to the file.
+            pattern_length (int): Number of warning events to form a pattern. Default is 3.
+    
+        Returns:
+            dict: Patterns with occurrences greater than 1.
+        """
+        
+        warning_patterns = {} # Dictionary to store patterns and their counts
+    
+        with open(file_path, 'r') as file:
+            logs = file.readlines()
+    
+        event_sequence = []
+    
+        for line in logs:
+            parts = [part.strip() for part in line.split('|')]
+            if len(parts) < 4:
+                continue
+    
+            event_type = parts[1]
+            event_desc = parts[3]
+    
+            # Append to sequence if it's a "Warning" event
+            if event_type == "Warning":
+                event_sequence.append((event_type, event_desc))
+    
+            # Only check for patterns if we have enough warning patterns to account for.
+            if len(event_sequence) >= pattern_length:
+    
+                # Create a pattern from the last 'pattern_length' warning events
+                pattern = tuple(event_sequence[-pattern_length:])
+                
+                # Increase the count of pattern, initilizing if necessary 
+                warning_patterns[pattern] = warning_patterns.get(pattern, 0) + 1
+        
+        # Use comprehension to filter patterns occurring more than once
+        significant_patterns = {pattern: count for pattern, count in warning_patterns.items() if count > 1}
+        return significant_patterns
+        
+    
+        log_file_path = "spring2024_system_events.txt"
+        pattern_length = 3
+        
+            # Call function with parsed arguments 
+        patterns = id_warning_patterns(log_file_path, pattern_length=pattern_length)
+        
+            # Display patterns using sequence unpacking and f-strings
+        for i, (pattern, count) in enumerate(patterns.items(), start=1):
+            events = " -> ".join(f"{event[1]}" for event in pattern) 
+            print(f"{i}. Pattern: {events} | Occurrences: {count}")
+
+    # NEED TO FIX INDENTATION, PROGRAM WORKS THIS WAY BUT RETURNS AN ERROR IF NOT
+
+    
     def keyword_search(self, file_path):
         """
         Allows users to search for and view specific event types from 
@@ -501,144 +561,51 @@ class SystemEventsManager:
                 break  
 
 
-def parse_args(arglist):
-    """ Processes command line arguments. 
-    Args:
-    arglist (list of str): arguments from the command line.
-    
-Returns:
-    namespace: the parsed arguments, as a namespace.
-    """
-    parser = ArgumentParser()
-    parser.add_argument("file_path", help="file containing the event logs")
-    args = parser.parse_args(arglist)
-    return args
-
-
-if __name__ == "__main__":
-    args = parse_args(sys.argv[1:])
-    
-    # create an instance of the temporaryName class
-    temp_obj = temporaryName()  
-    
-    # calls extract_date_time 
-    temp_obj.extract_date_time(args.file_path)
-
-    # call keyword_search 
-    temp_obj.keyword_search(args.file_path)
-
-    
-    def id_warning_patterns(file_path, pattern_length=3):
-        """  
-        Identifies patterns of warning events in the log file.
-
-        Parameters:
-            file_path (str): Path to the file.
-            pattern_length (int): Number of warning events to form a pattern. Default is 3.
-
-        Returns:
-            dict: Patterns with occurrences greater than 1.
-        """
+    def event_sequence(self, file_path):
+        """A function to find the most common order of system events within the txt file.  
             
-        warning_patterns = {} # Dictionary to store patterns and their counts
-
-        with open(file_path, 'r') as file:
-            logs = file.readlines()
-
-        event_sequence = []
-
-        for line in logs:
-            parts = [part.strip() for part in line.split('|')]
-            if len(parts) < 4:
-                continue
-
-            event_type = parts[1]
-            event_desc = parts[3]
-
-            # Append to sequence if it's a "Warning" event
-            if event_type == "Warning":
-                event_sequence.append((event_type, event_desc))
-
-            # Only check for patterns if we have enough warning patterns to account for.
-            if len(event_sequence) >= pattern_length:
-
-                # Create a pattern from the last 'pattern_length' warning events
-                pattern = tuple(event_sequence[-pattern_length:])
-                
-                # Increase the count of pattern, initilizing if necessary 
-                warning_patterns[pattern] = warning_patterns.get(pattern, 0) + 1
-        
-        # Use comprehension to filter patterns occurring more than once
-        significant_patterns = {pattern: count for pattern, count in warning_patterns.items() if count > 1}
-        return significant_patterns
-
-
-
-    log_file_path = "spring2024_system_events.txt"
-    pattern_length = 3
-
-    # Call function with parsed arguments 
-    patterns = id_warning_patterns(log_file_path, pattern_length=pattern_length)
-
-    # Display patterns using sequence unpacking and f-strings
-    for i, (pattern, count) in enumerate(patterns.items(), start=1):
-        events = " -> ".join(f"{event[1]}" for event in pattern) 
-        print(f"{i}. Pattern: {events} | Occurrences: {count}")
-
-
-    def event_sequence(file_path):
-        """A function to find the most common order of system events within the
-        txt file.  
-        
         Args: 
-            file_path (str): name of the file that will be read to get the
-                system events information for. 
-        
-    Returns:
-        The top three most common sequences of events as strings in tuples with
-            the number of occurences listed after the sequences. 
-                Format (note: is along the lines of what looking to output,
-                numbers/sequences below are not exact): 
-                    "Top 3 most common sequences:
-                    (event1, event2, event3): 28
-                    (event6, event3, event2): 16
-                    (event1, event2): 15"
-        
-    Side effects: 
-        Adds/modifies the keys and values of "count" dictionary (mutable) when
-            seeing what sequences of events have occurred.  
-
-    Attribution:
-        The Python Software Foundation (2024) 4.3. The range() Function
-            (Version 2) [Source code].
-            https://umd.instructure.com/courses/1374047/assignments/syllabus.
-        (link accessed/found through "4. More Control Flow Tools" link in
-            "Prerequisite knowledge" module in Professor Aric Bill's INST326
-            Fall 2024 syllabus)
-        
-        Used range() function under section 4.3 from following examples:
-            Source code snippet 1:
-                "list(range(5, 10))"
-            Source code snippet 2: 
-                "a = ['Mary', 'had', 'a', 'little', 'lamb']
-                for i in range(len(a))"
-
-        My modifications:
-            "for len_of_sequence in range(2, len(entire_descriptions))" and
-            "for start_point in
-                range(0, len(entire_descriptions) - len_of_sequence)" - combined
-                both source code snippets to include searching within a range
-                for both regular numeric values (2) and the length of a list
-                (len(entire_descriptions)).
+            file_path (str): name of the file that will be read to get the system events information for. 
             
-        More information about why/how used source code in program in PDF documentation for final submission.
-        """
+        Returns:
+            The top three most common sequences of events as strings. 
+                Format (note: is along the lines of what looking to output, numbers/sequences below are not exact): 
+                "Top 3 most common sequences:
+                (event1, event2, event3): 28
+                (event6, event3, event2): 16
+                (event1, event2): 15"
+            
+        Side effects: 
+            Adds/modifies the keys and values of "count" dictionary (mutable) when seeing what sequences of events
+                have occurred.  
 
+        Attribution:
+            The Python Software Foundation (2024) 4.3. The range() Function (Version 2) [Source code].
+                https://umd.instructure.com/courses/1374047/assignments/syllabus.
+            (link accessed/found through "4. More Control Flow Tools" link in "Prerequisite knowledge" module in
+                Professor Aric Bill's INST326 Fall 2024 syllabus)
+            
+            Used range() function under section 4.3 from following examples:
+                Source code snippet 1:
+                    "list(range(5, 10))"
+                Source code snippet 2: 
+                    "a = ['Mary', 'had', 'a', 'little', 'lamb']
+                    for i in range(len(a))"
+
+            My modifications:
+                "for len_of_sequence in range(2, len(entire_descriptions))"
+                and "for start_point in range(0, len(entire_descriptions) - len_of_sequence)" - combined both source code
+                    snippets to include searching within a range for both regular numeric values (2) and the length of a
+                    list (len(entire_descriptions)).
+                
+            More information about why/how used source code in program in PDF documentation for final submission.
+            """
+            
         # will include all the event descriptions/entries within the file to be
             # sorted afterwards
         entire_descriptions = []
 
-        
+
         with open(file_path, "r", encoding="utf-8") as f:
             # capturing group that matches one or more characters from the end
                 # of line in the file that is not separator character (|) 
@@ -646,9 +613,9 @@ if __name__ == "__main__":
             
             for line in f:
                 matches = re.search(regex, line)
-                
+            
                 # if matches the filtering criteria (meaning is the "event
-                    # description")  
+                    # description")
                 if matches:
                     # gets entire match object and strips the whitespace, not
                         # including the spaces between words (before stripping,
@@ -656,7 +623,6 @@ if __name__ == "__main__":
                     event_desc = matches.group(0).strip()
                     entire_descriptions.append(event_desc)
 
-        
         # empty dictionary for now, but will be in following the format later:
         # count = {
             # sequence1: number of times sequence has occurred
@@ -664,23 +630,24 @@ if __name__ == "__main__":
             # etc.}
         count = {}
 
-        
+
         # goes through all possible sequence lengths that can occur until have
             # gone through all of the events in the file (range starts at 2
             # since at least two events need to be listed to be considered a
             # sequence)
-                # (in other words: one event is not a sequence since it's by itself)
+                # (in other words: one event is not a sequence since it's by
+                # itself)
         for len_of_sequence in range(2, len(entire_descriptions)):
-
+            
             
             # now actually going through each event sequence to see what events
                 # different sequences can contain (like what events come after
                 # each other)
             # starting at first event in list of event descriptions (index 0)
                 # and iterates until the last line/event (minus the length of 
-                # sequences we're trying to find) in order to prevent the the indexes
-                # from going out of bounds
-                    # (eg: if we have a list of 6 event_desc in
+                # sequences we're trying to find) in order to prevent the
+                # indexes from going out of bounds
+                    # eg: if we have a list of 6 event_desc in
                     # entire_descriptions,
                         # entire_descriptions =
                             # [event1, event2, event3, event4, event5, event6]
@@ -707,13 +674,12 @@ if __name__ == "__main__":
                                             # iteration 0         iteration 1
                                             # (since start_point
                                                 # is 0)
-                        # (will end at finding (event 5, event 6) since length of
-                            # list is 6 and next iteration would be (event6, event7)
-                            # which does not exist)
+                        # (will end at finding (event 5, event 6) since length
+                            # of list is 6 and next iteration would be 
+                            # (event6, event7) which does not exist)
             for start_point in range(0, len(entire_descriptions) -
-                len_of_sequence):
+                                     len_of_sequence):
                 
-
                 # need to put found sequences in tuples b/c tuples allow to use
                     # the sequences as keys in the "count" dictionary (which 
                     # then allows to look up number of occurences per sequence)
@@ -721,22 +687,16 @@ if __name__ == "__main__":
                     # = 0, and len_of_sequence = 2, this determines the limit of
                     # the number of elements in the sequence we are looking at
                 individual_sequence = tuple(entire_descriptions
-                    [start_point:start_point + len_of_sequence])
-                                                    # from eg: [0: 0 + 2]
-                                                        # start at index 0 and
-                                                        # go through events in
-                                                        # range, excluding event/
-                                                        # endpoint which we
-                                                        # don't want to count
-                                                        # eg: event1, event2,
-                                                            # event3
-                                                        # counts (event1,event2)
-                                                            #    (index0,index1)
-                                                        # but doesn't count
-                                                            # event3
-                                                            # (index2)
-                                                        
-                                                        
+                                    [start_point:start_point + len_of_sequence])
+                                    # from eg: [0: 0 + 2]
+                                    # start at index 0 and go through events
+                                    # within range, excluding the endpoint/event
+                                    # which we don't want to count
+                                        # eg: event1, event2, event3
+                                        # counts (event1, event2) but not event3
+                                        #       (index0, index1)        (index2)
+                
+                
                 # if that sequence already exists as a key, then add 1 to the
                     # current number of occurences
                     # (eg: if "event1, event 2" is not a key)
@@ -748,40 +708,50 @@ if __name__ == "__main__":
                 else:
                     count[individual_sequence] = 1
 
-            
             # "count.items()" - allows iteration over keys/val in "count" dict
             # "lambda x: x[1]" - looking at first index/sorting by number of
                 # occurrences (index 0 = sequence itself)
-            # "reverse = True" - sorts from descending order (most common sequences
-                # at top)
-        ordered_sequences = sorted(count.items(), key=lambda x: x[1],
-                                   reverse=True)
-
-            
+            # "reverse = True" - sorts from descending order (most common 
+                # sequences at top)
+        ordered_sequences = sorted(count.items(), key=lambda x: x[1], reverse=True)
+        
             # getting the top three most common sequences using slicing; gets
                 # everything before the third index
                 # (meaning everything before the fourth most common sequence
                 # since indexes start at 0)
         most_common_sequences = ordered_sequences[:3]
 
+
         result_heading = "Top 3 most common sequences:\n"
         result_content = ""
-
-            # for each key/value pairs for the top 3 most common sequences,
+        
+        # for each key/value pairs for the top 3 most common sequences,
         for individual_sequence, num_occurences in most_common_sequences:
-                # add those pairs to what we're going to be outputting
+            # add those pairs to what we're going to be outputting
             result_content += f"{individual_sequence}: {num_occurences}\n"
-    
+
         return result_heading + result_content
     
     
-    if __name__ == "__main__":
-        file_path = "spring2024_system_events.txt"
-        
-        result = event_sequence(file_path)
-        print(result)
+    # if __name__ == "__main__":
+    #     file_path = "spring2024_system_events.txt"
+         
+    #     result = event_sequence(file_path)
+    #     print(result)
+
+
+    # NEED TO FIX ^ ABOVE CODE RETURNS AN (IF COMMENTED OUT, RUNS, BUT NO
+    # OUTPUT TO TERMINAL)
     
     
+    def pandas_operations(self):
+        print("Successfully printed pandas_operations")
+
+
+    def visualize_warning_patterns(self):
+        print("Successfully printed visualize_warning_patterns")
+
+
     def main_menu(self, file_path, path):
         "temporary docstring"
         
@@ -796,17 +766,15 @@ if __name__ == "__main__":
         print("5. keyword_search") # Neha's second func
         print("6. event_sequence") # Christie's first func
         
-        print("7. name") # Cam's second func
-        print("8. name") # Stephany's second func
+        print("7. pandas_operations") # Cam's second func
+        print("8. visualize_warning_patterns") # Stephany's second func
         # this function itself is already Christie's second function, so that's
             # why it's not listed  
 
         
         # missing:
-            # cam's second func name
-            # stephany's second func name
-
-        # if have time, try putting this func in a loop so that it can ask if want to run another function after one runs
+            # cam's second func 
+            # stephany's second func 
         
         # get rid of any whitespace when user writes their input
         function_choice = input("Enter corresponding function number \
@@ -850,15 +818,27 @@ if __name__ == "__main__":
         elif function_choice == "6": 
             self.event_sequence(file_path)
         elif function_choice == "7":
-            self.name1() # Cam's second func (need name)
+            self.pandas_operations() # Cam's second func
         elif function_choice == "8":
-            self.name2() # Stephany's second func (need name) 
+            self.visualize_warning_patterns() # Stephany's second func
         else: 
             print("Please enter a valid function number (1, 2, 3, 4, 5, 6, 7, 8).")
 
+def parse_args(arglist):
+    """ Processes command line arguments. 
+    Args:
+        arglist (list of str): arguments from the command line.
 
-        file_path = "spring2024_system_events.txt"
-        path = "spring2024_system_events.txt"
+    Returns:
+        namespace: the parsed arguments as a namespace.
+    """
+    parser = ArgumentParser()
+    parser.add_argument("file_name", help="file containing the system events")
+    return parser.parse_args(arglist)
 
-        example = temporaryName()
-        example.main_menu(file_path, path)
+if __name__ == "__main__":
+    file_path = "spring2024_system_events.txt"
+    path = "spring2024_system_events.txt"
+
+    example = SystemEventsManager()
+    example.main_menu(file_path, path)
