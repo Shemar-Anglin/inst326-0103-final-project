@@ -301,24 +301,7 @@ class SystemEventsManager:
                 if month_int == q3_int and day_int == q4_int:
                     print(line)
                 
-    def parse_args(arglist):
-        """ Processes command line arguments. 
-        Args:
-            arglist (list of str): arguments from the command line.
-    
-        Returns:
-            namespace: the parsed arguments, as a namespace.
-        """
-        parser = ArgumentParser()
-        parser.add_argument("file", help="file containing the event logs")
-        args = parser.parse_args(arglist)
-        return args
-
-
-    if __name__ == "__main__":
-        args = parse_args(sys.argv[1:])
-        summary(args.file)
-        
+  
              
     def activity(path, histogram=True):
         """ Displays a histogram showing each month's activity or optionally
