@@ -1,6 +1,7 @@
 import re
 from argparse import ArgumentParser
 import sys
+import matplotlib.pyplot as plt
 
 class SystemEventsManager:
     """temporary class docstring"""
@@ -364,57 +365,128 @@ class SystemEventsManager:
                     
         
     def id_warning_patterns(file_path, pattern_length=3):
-        """  Identifies patterns of warning events in the log file.
+        """  
+        Identifies patterns of warning events in the log file.
+
         Parameters:
             file_path (str): Path to the file.
             pattern_length (int): Number of warning events to form a pattern. Default is 3.
+
         Returns:
             dict: Patterns with occurrences greater than 1.
         """
-        warning_patterns = {}  
-
-    with open(file_path, 'r') as file:
-        logs = file.readlines()
-
-    event_sequence = []
-
-    for line in logs:
-        parts = [part.strip() for part in line.split('|')]
-        if len(parts) < 4:
-            continue
-
-        event_type = parts[1]
-        event_desc = parts[3]
-
-        if event_type == "Warning":
-            event_sequence.append((event_type, event_desc))
-
-        if len(event_sequence) >= pattern_length:
-            
-            pattern = tuple(event_sequence[-pattern_length:])
-
-            warning_patterns[pattern] = warning_patterns.get(pattern, 0) + 1
-
-    significant_patterns = {pattern: count for pattern, count in warning_patterns.items() if count > 1}
-    return significant_patterns
-
-
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Identify recurring warning patterns in a log file.")
-    parser.add_argument("log_file", type=str, help="Path to the log file")
-    parser.add_argument("--pattern_length", type=int, default=3, help="Number of warning events to form a pattern (default is 3)")
-    
-    args = parser.parse_args()
-
-    patterns = id_warning_patterns(args.log_file, pattern_length=args.pattern_length)
-
-    for i, (pattern, count) in enumerate(patterns.items(), start=1):
-        events = " -> ".join(f"{event[1]}" for event in pattern) 
-        print(f"{i}. Pattern: {events} | Occurrences: {count}")
-
         
+        warning_patterns = {} # Dictionary to store patterns and their counts
+
+        with open(file_path, 'r') as file:
+            logs = file.readlines()
+
+        event_sequence = []
+
+        for line in logs:
+            parts = [part.strip() for part in line.split('|')]
+            if len(parts) < 4:
+                continue
+
+            event_type = parts[1]
+            event_desc = parts[3]
+
+            # Append to sequence if it's a "Warning" event
+            if event_type == "Warning":
+                event_sequence.append((event_type, event_desc))
+
+            # Only check for patterns if we have enough warning patterns to account for.
+            if len(event_sequence) >= pattern_length:
+
+             # Create a pattern from the last 'pattern_length' warning events
+             pattern = tuple(event_sequence[-pattern_length:])
+            
+             # Increase the count of pattern, initilizing if necessary 
+             warning_patterns[pattern] = warning_patterns.get(pattern, 0) + 1
+    
+        # Use comprehension to filter patterns occurring more than once
+        significant_patterns = {pattern: count for pattern, count in warning_patterns.items() if count > 1}
+        return significant_patterns
+
+log_file_path = "spring2024_system_events.txt"
+pattern_length = 3
+
+# Call function with parsed arguments 
+patterns = id_warning_patterns(log_file_path, pattern_length=pattern_length)
+
+# Display patterns using sequence unpacking and f-strings
+for i, (pattern, count) in enumerate(patterns.items(), start=1):
+    events = " -> ".join(f"{event[1]}" for event in pattern) 
+    print(f"{i}. Pattern: {events} | Occurrences: {count}")
+
+
+
+    def visualize_warning_patterns(patterns, timestamps):
+        """
+        Visualizes warning patterns as a bar chart and warning trends over time as a timeline chart.
+
+        Parameters:
+            patterns (dict): Dictionary of warning patterns and their occurrences.
+            timestamps (list): List of timestamps for all warning events.
+         """
+        # Visualization 1: Bar Chart for Most Frequent Warning Patterns
+        if patterns:
+            # Prepare data for bar chart
+            pattern_labels = [" -> ".join(event[1] for event in pattern) for pattern in patterns.keys()]
+            pattern_counts = list(patterns.values())
+
+            # Plot bar chart
+            plt.figure(figsize=(10, 6))
+            plt.barh(pattern_labels, pattern_counts, color='skyblue')
+            plt.xlabel("Occurrences")
+            plt.ylabel("Warning Patterns")
+            plt.title("Most Frequent Warning Patterns")
+            plt.tight_layout()
+            plt.show()
+        
+        # Visualization 2: Timeline Chart for Warning Trends
+        if timestamps:
+            # Ensure timestamps are strings and extract the date portion
+            dates = [ts[:10] for ts in timestamps]
+
+        # Count warnings per day
+        counts_by_date = {}
+        for date in dates:
+            counts_by_date[date] = counts_by_date.get(date, 0) + 1
+
+        # Prepare data for timeline
+        sorted_dates = list(sorted(counts_by_date.keys()))
+        counts = [counts_by_date[date] for date in sorted_dates]
+       
+         # Plot timeline
+        plt.figure(figsize=(12, 6))
+        plt.plot(sorted_dates, counts, marker='o', color='orange')
+        plt.xlabel("Date")
+        plt.ylabel("Number of Warnings")
+        plt.title("Warning Events Over Time")
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
+
+# Example main code
+log_file_path = "spring2024_system_events.txt"
+pattern_length = 3
+
+# Ensure you define the `patterns` and `timestamps` dictionaries before running this function
+patterns = id_warning_patterns(log_file_path, pattern_length=pattern_length)
+
+timestamps = [
+    "2024-01-01 01:33:00",
+    "2024-01-01 07:54:00",
+    "2024-01-01 10:23:00",
+    "2024-01-02 11:02:00",
+    "2024-01-03 04:30:00",
+    "2024-01-03 08:53:00",
+     ]
+
+# Visualize results
+visualize_warning_patterns(patterns, timestamps)
+
 
     def event_sequence(file_path):
         """A function to find the most common order of system events within the
