@@ -35,18 +35,13 @@ class SystemEventsManager:
         
         event_categories = {
             "Error":["Represents errors that occur on the system.",
-                    "EX: Appllication \"XYX\" failed to start"
-            ],
+                    "EX: Appllication \"XYX\" failed to start"],
             "Warning":["Indicates warning conditions.",
-                    "EX: Temperature warning: CPU overheating."
-                
-            ],
+                    "EX: Temperature warning: CPU overheating."],
             "Update":["Represents instances of updates made on the system.",
-                    "EX: Driver update for graphics card completed"
-            ],
+                    "EX: Driver update for graphics card completed"],
             "Security":["Security events that occured on the system",
-                        "EX: Unauthorized login attempt"   
-            ]
+                        "EX: Unauthorized login attempt"]
         }
         
         def get_last_event_information():
@@ -203,7 +198,7 @@ class SystemEventsManager:
                 )
                 
                 with open(file_path, 'a') as file:
-                    file.write(new_event + "\n")
+                    file.write("\n" + new_event)
                 print("SUCCESS! The event has been added\n")
                 
                 change_log_record(
