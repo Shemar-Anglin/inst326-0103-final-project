@@ -1,4 +1,5 @@
 import re
+import pandas as pd
 from argparse import ArgumentParser
 import sys
 
@@ -235,11 +236,14 @@ class SystemEventsManager:
                     break
             except ValueError as e:
                 print(e)
+            
+            
+        pass
 
-    
-    def summary(self, path):
-        """ Displays a dictionary of the number of events then the user chooses a 
-        review of an event type or a specific date to display events.
+
+    def summary (path):
+        """ Displays a dictionary of the number of events then the user chooses 
+        a review of an event type or a specific date to display events.
         Args:
             path(string): A path to the text file of event logs
         Side effects:
@@ -303,28 +307,35 @@ class SystemEventsManager:
                 day_int = int(day)
                 if month_int == q3_int and day_int == q4_int:
                     print(line)
-
-    def parse_args(arglist):
-        """ Processes command line arguments. 
+        
+             
+    def activity(self, path, histogram=True):
+        """ Displays a histogram showing each month's activity or optionally
+        shows the data frame.
         Args:
-            arglist (list of str): arguments from the command line.
-    
+            path(string): A path to the file.
+            histogram (boolean): optional data frame that shows which month
+            is assigned to each row.
         Returns:
-            namespace: the parsed arguments, as a namespace.
+            A histogram or data frame
         """
-        parser = ArgumentParser()
-        parser.add_argument("file", help="file containing the event logs")
-        args = parser.parse_args(arglist)
-        return args
-        
-    
-        
-    # removed if name == main for summary function bc was source of errors
-    
-    
-    
+        month_count = []
+        with open(path, "r", encoding = "utf-8") as file:
+            for events in file:
+                line = events.split(" | ")
+                date_time = line[0].split(" ")[0]
+                month = int(date_time.split("-")[1])
+                month_count.append(month)
+        month_dict = {"month_count": month_count}
+        df = pd.DataFrame(month_dict)
 
-    def extract_date_time(self, file_path):
+        if histogram == True:
+            return df.hist("month_count")
+        else:
+            return df
+    
+    
+    def extract_date_time(file_path):
         """
         Extracts the date and time from each event entry in a system event file.
 
@@ -766,7 +777,7 @@ class SystemEventsManager:
         print("5. keyword_search") # Neha's second func
         print("6. event_sequence") # Christie's first func
         
-        print("7. pandas_operations") # Cam's second func
+        print("7. activity") # Cam's second func
         print("8. visualize_warning_patterns") # Stephany's second func
         # this function itself is already Christie's second function, so that's
             # why it's not listed  
@@ -818,7 +829,7 @@ class SystemEventsManager:
         elif function_choice == "6": 
             self.event_sequence(file_path)
         elif function_choice == "7":
-            self.pandas_operations() # Cam's second func
+            self.activity(path) # Cam's second func
         elif function_choice == "8":
             self.visualize_warning_patterns() # Stephany's second func
         else: 
