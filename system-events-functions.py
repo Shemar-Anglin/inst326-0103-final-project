@@ -114,10 +114,10 @@ class SystemEventsManager:
                     file if it does not exist.
             """
             
-            if change_log_file is None:
-                change_log_file_path = "default_system_made_change_log.txt"
-            else:
-                change_log_file_path = change_log_file
+            change_log_file_path = (
+                "default_system_made_change_log.txt" if change_log_file is None 
+                else change_log_file
+            )
             
             try:
                 with open(change_log_file_path, 'r') as log_file:
