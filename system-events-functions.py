@@ -116,10 +116,10 @@ class SystemEventsManager:
                     file if it does not exist.
             """
             
-            if change_log_file is None:
-                change_log_file_path = "default_system_made_change_log.txt"
-            else:
-                change_log_file_path = change_log_file
+            change_log_file_path = (
+                "default_system_made_change_log.txt" if change_log_file is None 
+                else change_log_file
+            )
             
             try:
                 with open(change_log_file_path, 'r') as log_file:
@@ -323,8 +323,9 @@ class SystemEventsManager:
         month_dict = {"month_count": month_count}
         df = pd.DataFrame(month_dict)
 
-        if histogram == True:
-            return df.hist("month_count")
+        if histogram:
+            df.hist("month_count")
+            plt.show()
         else:
             return df
     
@@ -378,21 +379,21 @@ class SystemEventsManager:
     def keyword_search(self, file_path):
         """
         Allows users to search for and view specific event types from 
-        the txt file. This function prompts the user to input an event type 
+        the txt file. The function prompts the user to input an event type 
         (e.g., Error, Warning) and a required keyword to filter event 
-        descriptions. Then processes the file to display matching events with 
-        their details, such as the date, event type, event ID, and description.
-        It also tracks and displays events and keywords previously 
+        descriptions. Then processes the file to show matching events with 
+        their details, like the date, event type, event ID, and description.
+        It also tracks and shows events and keywords previously 
         viewed during the session.
 
         Args:
-            file_path (str): Path to the txt file that contains system events.
+            file_path (str):  The path to the system event file
 
         Side effects:  
-            - Prompts the user for input (event type and keyword).
+            - Prompts the user for input (event type and required keyword).
             - Reads and processes the file to find matching events.
             - Prints matching event details (search results) to the console, 
-              including event date, type, ID, and description.
+              like event date, type, ID, and description.
             - Prints error messages to the console if the file is not found 
               or if an unexpected error occurs.
             - Prints previously searched keywords and events if the user wants 
@@ -401,7 +402,7 @@ class SystemEventsManager:
         
         Raises:
             FileNotFoundError: If the file is not found.
-            Exception: If any other unexpected error occurs 
+            Exception: If there are unexpected error 
         """
         event_history = []  
         keyword_history = []  
@@ -418,13 +419,13 @@ class SystemEventsManager:
 
         while True:
             try:
-                # Ask the user what kind of event they want to search for
+                # Ask the user what type of event they want to search for
                 event_type = input(
                     "Enter the event type you want to search for "
                     "(e.g., Error, Update, Warning, Security, Files): "
                 ).strip()
 
-                # Ask the user for a keyword 
+                # Ask the user for a reqired keyword 
                 while True:
                     keyword = input(
     "Enter keyword to filter descriptions:"
@@ -434,7 +435,7 @@ class SystemEventsManager:
                     else:
                         print("Keyword is required. Enter a valid keyword.")
                 
-                # Add the keyword to keyword history (avoid duplicates)
+                # add the keyword to keyword history 
                 if keyword not in keyword_history:
                     keyword_history.append(keyword)
 
@@ -449,7 +450,7 @@ class SystemEventsManager:
                             len(parts) > 3 
                             and event_type.lower() in parts[1].strip().lower()
                         ):
-                            # Extract the event details
+                            # extract the event details
                             date_time = parts[0].strip()  
                             event = parts[1].strip()  
                             event_id = parts[2].strip() 
@@ -460,11 +461,11 @@ class SystemEventsManager:
                             event_details = (
     f"{date_time} | {event} | {event_id} | {description}"
 )
-                            # Print the matching event
+                            # print the matching event
                             print(f"\n{event_details}")
                             event_found = True
                             
-                            # Add the event to the event history
+                            # add the event to the event history
                             if event_details not in event_history:
                                 event_history.append(event_details)
                     print(
