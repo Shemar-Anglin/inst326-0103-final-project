@@ -5,13 +5,22 @@ import sys
 import matplotlib.pyplot as plt
 
 class SystemEventsManager:
-    """temporary docstring"""
-    # NEED TO REMEMBER TO ADD SELF AS PARAMETERS TO ALL FUNCTIONS IN ORDER FOR MAIN MENU FUNCTION TO WORK
+    """A class for analyzing a txt log file containing a list of system events
+       that have occurred on the user's computer.
+       
+       Attributes:
+            file_path (str): name of the file that will be read to get the
+                system events information for. 
+            path (str): name of the file that will be read to get the
+                system events information for.
+        """
     
     def manage_system_events(self, file_path, change_log_file=None):
         """Manages system events through a series of nested functions that allow
         users to add events, and records the changes in a log.
-
+            Primary author of function: Shemar Anglin
+            Technique: N/A
+        
         Args:
             file_path (str): the path to the file where system events are logged
             change_log_file (str, optional): The path to the file where changes 
@@ -31,7 +40,6 @@ class SystemEventsManager:
                 information.
             Reads the given txt file and writes to the given txt files when
                 neccessary.
-        
         """
         
         event_categories = {
@@ -47,6 +55,8 @@ class SystemEventsManager:
         
         def get_last_event_information():
             """Retrieves the last date, time, and ID of the last event.
+                    Primary author of function: Shemar Anglin
+                    Technique: With statements
 
             Raises:
                 FileNotFoundError: If teh specified file is not found.
@@ -72,7 +82,9 @@ class SystemEventsManager:
         def format_given_date_and_time(date, time):
             """Formats the provided date and time into a standard 
                 'YYYY-MM-DD HH:MM:00' format.
-
+                    Primary author of function: Shemar Anglin
+                    Technique: N/A
+                    
             Args:
                 date (str): The date that is in MMDDYYYY format.
                 time (str): The time that is in HHMM format.
@@ -82,7 +94,7 @@ class SystemEventsManager:
                     expected ranges.
 
             Returns:
-                str: The formattedd date and time as one simple string.
+                str: The formatted date and time as one simple string.
             """
             
             if len(date) != 8 or len(time) != 4:
@@ -104,7 +116,9 @@ class SystemEventsManager:
         ):
             """Records every change that is made in by the user, the type of
                 change, the prority level, and the description of the events.
-
+                    Primary author of function: Shemar Anglin
+                    Technique: Conditional expressions
+                    
             Args:
                 user_name (str): The name of the user that is making the change.
                 change_type (str): Type of change being made.
@@ -138,10 +152,12 @@ class SystemEventsManager:
                 log_file.write(new_entry)
         
         def add_system_event():
-            """Prompts the user to ass a new system event, calls on the other
+            """Prompts the user to add a new system event, calls on the other
             functions to validate and format inputs, and writes the event
             details to the event file and updates the change log.
-            
+                Primary author of function: Shemar Anglin
+                Technique: N/A
+                
             Raises:
                 ValueError: If the date and time inputs are not in the correct
                     format.
@@ -242,6 +258,8 @@ class SystemEventsManager:
         Side effects:
             prints general summary, review, and time frames into the console.
             prints dictionary, review, and time frames into the console.
+                Primary author of function: Cam Gordon
+                Technique: Comprehensions
         """
         events = ["Update", "Files", "Error", "Warning", "Security"]
         general_summ = {event: 0 for event in events}
@@ -306,10 +324,14 @@ class SystemEventsManager:
     def activity(self, path, histogram=True):
         """ Displays a histogram showing each month's activity or optionally
         shows the data frame.
+            Primary author of function: Cam Gordon
+            Technique: Optional parameter
+            
         Args:
             path(string): A path to the file.
             histogram (boolean): optional data frame that shows which month
             is assigned to each row.
+            
         Returns:
             A histogram or data frame
         """
@@ -333,7 +355,9 @@ class SystemEventsManager:
     def extract_date_time(self, file_path):
         """
         Extracts the date and time from each event entry in a system event file
-
+            Primary author of function: Neha Islam
+            Technique: Regular expressions
+            
         Args: 
             file_path(str): The path to the system event file
         
@@ -385,7 +409,9 @@ class SystemEventsManager:
         their details, like the date, event type, event ID, and description.
         It also tracks and shows events and keywords previously 
         viewed during the session.
-
+            Primary author of function: Neha Islam
+            Technique: F-strings that contain expressions
+            
         Args:
             file_path (str):  The path to the system event file
 
@@ -508,20 +534,18 @@ class SystemEventsManager:
                 break  
                             
                             
-
-        
     def id_warning_patterns(self, file_path, pattern_length=3):
         """  
         Identifies patterns of warning events in the log file.
-
+            Primary author of function: Stephany Alas-Jovel
+            Technique: Sequence Unpacking
         Parameters:
             file_path (str): Path to the file.
             pattern_length (int): Number of warning events to form a pattern. Default is 3.
-
         Returns:
             dict: Patterns with occurrences greater than 1.
         """
-        
+
         warning_patterns = {} # Dictionary to store patterns and their counts
 
         with open(file_path, 'r') as file:
@@ -546,10 +570,10 @@ class SystemEventsManager:
 
              # Create a pattern from the last 'pattern_length' warning events
              pattern = tuple(event_sequence[-pattern_length:])
-            
+
              # Increase the count of pattern, initilizing if necessary 
              warning_patterns[pattern] = warning_patterns.get(pattern, 0) + 1
-    
+
         # Use comprehension to filter patterns occurring more than once
         significant_patterns = {pattern: count for pattern, count in warning_patterns.items() if count > 1}
         return significant_patterns
@@ -570,7 +594,8 @@ class SystemEventsManager:
     def visualize_warning_patterns(self, patterns, timestamps):
         """
         Visualizes warning patterns as a bar chart and warning trends over time as a timeline chart.
-
+            Primary author of function: Stephany Alas-Jovel
+            Technique: Data visualization - bar chart, timeline chart
         Parameters:
             patterns (dict): Dictionary of warning patterns and their occurrences.
             timestamps (list): List of timestamps for all warning events.
@@ -589,7 +614,7 @@ class SystemEventsManager:
             plt.title("Most Frequent Warning Patterns")
             plt.tight_layout()
             plt.show()
-        
+
         # Visualization 2: Timeline Chart for Warning Trends
         if timestamps:
             # Ensure timestamps are strings and extract the date portion
@@ -603,7 +628,7 @@ class SystemEventsManager:
         # Prepare data for timeline
         sorted_dates = list(sorted(counts_by_date.keys()))
         counts = [counts_by_date[date] for date in sorted_dates]
-       
+
          # Plot timeline
         plt.figure(figsize=(12, 6))
         plt.plot(sorted_dates, counts, marker='o', color='orange')
@@ -634,10 +659,13 @@ class SystemEventsManager:
     visualize_warning_patterns(patterns, timestamps)
 
 
+
     def event_sequence(self, file_path):
         """A function to find the most common order of system events within the
-        txt file.  
-        
+            txt file.  
+                Primary author of function: Christie Cao
+                Technique: Key function (lambda expression using sorted())
+            
         Args: 
             file_path (str): name of the file that will be read to get the
                 system events information for. 
@@ -825,7 +853,9 @@ class SystemEventsManager:
             for that function. Makes other program functions an instance that
             can be called in this main_menu function (in order to run the
             corresponding function once the user has requested it).
-            
+                Primary author of function: Christie Cao
+                Technique: N/A
+                
         Args:
             file_path (str): name of the file that will be read to get the
                 system events information for. One of two arguments for the 
@@ -872,16 +902,17 @@ class SystemEventsManager:
             self.extract_date_time(file_path)
         elif function_choice == "4":
             print("\n Function number 4/id_warning_patterns(): \n")        
-            
-            patterns = self.id_warning_patterns(file_path)
+
 
             # running what the function I am referencing (id_warning_patterns)
-                # did to display the results of their own function
+                # did to display the results of their own function since it
+                # wasn't directly inside the function
             # Original function portion:
             # Call function with parsed arguments 
-            # patterns = id_warning_patterns(log_file_path,
-                # pattern_length=pattern_length)
-        
+            # patterns = id_warning_patterns(log_file_path,\
+            #     pattern_length=pattern_length)
+            patterns = self.id_warning_patterns(file_path)
+
             # Display patterns using sequence unpacking and f-strings
             # for i, (pattern, count) in enumerate(patterns.items(), start=1):
             #     events = " -> ".join(f"{event[1]}" for event in pattern) 
@@ -906,7 +937,9 @@ class SystemEventsManager:
 
 def parse_args(arglist):
     """Processes command line arguments. 
-    
+            Primary author of function: Christie Cao
+            Technique: ArgumentParser class
+        
     Args:
         arglist (list of str): arguments from the command line.
 
