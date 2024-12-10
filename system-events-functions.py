@@ -2,6 +2,7 @@ import re
 import pandas as pd
 from argparse import ArgumentParser
 import sys
+import matplotlib.pyplot as plt
 
 class SystemEventsManager:
 
@@ -389,15 +390,13 @@ class SystemEventsManager:
 
         Side effects:  
             - Prompts the user for input (event type and keyword).
-            - Reads and processes the log file to find matching events.
+            - Reads and processes the file to find matching events.
             - Prints matching event details (search results) to the console, 
               including event date, type, ID, and description.
             - Prints error messages to the console if the file is not found 
               or if an unexpected error occurs.
-            - Prints previously searched keywords and events if the user opts 
+            - Prints previously searched keywords and events if the user wants 
               to view them.
-            - Prints confirmation messages when an event is found or if no 
-                events match the search criteria.
             - Prints instructions to the console to guide the user.
         
         Raises:
@@ -511,218 +510,159 @@ class SystemEventsManager:
                     
         
     def id_warning_patterns(file_path, pattern_length=3):
-        """  Identifies patterns of warning events in the log file.
+        """  
+        Identifies patterns of warning events in the log file.
+
         Parameters:
             file_path (str): Path to the file.
             pattern_length (int): Number of warning events to form a pattern. Default is 3.
-    
+
         Returns:
             dict: Patterns with occurrences greater than 1.
         """
         
         warning_patterns = {} # Dictionary to store patterns and their counts
-    
+
         with open(file_path, 'r') as file:
             logs = file.readlines()
-    
+
         event_sequence = []
-    
+
         for line in logs:
             parts = [part.strip() for part in line.split('|')]
             if len(parts) < 4:
                 continue
-    
+
             event_type = parts[1]
             event_desc = parts[3]
-    
+
             # Append to sequence if it's a "Warning" event
             if event_type == "Warning":
                 event_sequence.append((event_type, event_desc))
-    
+
             # Only check for patterns if we have enough warning patterns to account for.
             if len(event_sequence) >= pattern_length:
+
+             # Create a pattern from the last 'pattern_length' warning events
+             pattern = tuple(event_sequence[-pattern_length:])
+            
+             # Increase the count of pattern, initilizing if necessary 
+             warning_patterns[pattern] = warning_patterns.get(pattern, 0) + 1
     
-                # Create a pattern from the last 'pattern_length' warning events
-                pattern = tuple(event_sequence[-pattern_length:])
-                
-                # Increase the count of pattern, initilizing if necessary 
-                warning_patterns[pattern] = warning_patterns.get(pattern, 0) + 1
-        
         # Use comprehension to filter patterns occurring more than once
         significant_patterns = {pattern: count for pattern, count in warning_patterns.items() if count > 1}
         return significant_patterns
-        
-    
-        log_file_path = "spring2024_system_events.txt"
-        pattern_length = 3
-        
-            # Call function with parsed arguments 
-        patterns = id_warning_patterns(log_file_path, pattern_length=pattern_length)
-        
-            # Display patterns using sequence unpacking and f-strings
-        for i, (pattern, count) in enumerate(patterns.items(), start=1):
-            events = " -> ".join(f"{event[1]}" for event in pattern) 
-            print(f"{i}. Pattern: {events} | Occurrences: {count}")
 
-    # NEED TO FIX INDENTATION, PROGRAM WORKS THIS WAY BUT RETURNS AN ERROR IF NOT
+log_file_path = "spring2024_system_events.txt"
+pattern_length = 3
 
-    
-    def keyword_search(self, file_path):
+# Call function with parsed arguments 
+patterns = id_warning_patterns(log_file_path, pattern_length=pattern_length)
+
+# Display patterns using sequence unpacking and f-strings
+for i, (pattern, count) in enumerate(patterns.items(), start=1):
+    events = " -> ".join(f"{event[1]}" for event in pattern) 
+    print(f"{i}. Pattern: {events} | Occurrences: {count}")
+
+
+
+    def visualize_warning_patterns(patterns, timestamps):
         """
-        Allows users to search for and view specific event types from 
-        the txt file. This function prompts the user to input an event type 
-        (e.g., Error, Warning) and a required keyword to filter event 
-        descriptions. Then processes the file to display matching events with 
-        their details, such as the date, event type, event ID, and description.
-        It also tracks and displays events and keywords previously 
-        viewed during the session.
+        Visualizes warning patterns as a bar chart and warning trends over time as a timeline chart.
 
-        Args:
-            file_path (str): Path to the txt file that contains system events.
+        Parameters:
+            patterns (dict): Dictionary of warning patterns and their occurrences.
+            timestamps (list): List of timestamps for all warning events.
+         """
+        # Visualization 1: Bar Chart for Most Frequent Warning Patterns
+        if patterns:
+            # Prepare data for bar chart
+            pattern_labels = [" -> ".join(event[1] for event in pattern) for pattern in patterns.keys()]
+            pattern_counts = list(patterns.values())
 
-        Side effects:  
-            - Prompts the user for input (event type and keyword).
-            - Reads and processes the log file to find matching events.
-            - Prints matching event details (search results) to the console, 
-              including event date, type, ID, and description.
-            - Prints error messages to the console if the file is not found 
-              or if an unexpected error occurs.
-            - Prints previously searched keywords and events if the user opts 
-              to view them.
-            - Prints confirmation messages when an event is found or if no 
-                events match the search criteria.
-            - Prints instructions to the console to guide the user.
+            # Plot bar chart
+            plt.figure(figsize=(10, 6))
+            plt.barh(pattern_labels, pattern_counts, color='skyblue')
+            plt.xlabel("Occurrences")
+            plt.ylabel("Warning Patterns")
+            plt.title("Most Frequent Warning Patterns")
+            plt.tight_layout()
+            plt.show()
         
-        Raises:
-            FileNotFoundError: If the file is not found.
-            Exception: If any other unexpected error occurs 
-        """
-        event_history = []  
-        keyword_history = []  
+        # Visualization 2: Timeline Chart for Warning Trends
+        if timestamps:
+            # Ensure timestamps are strings and extract the date portion
+            dates = [ts[:10] for ts in timestamps]
 
-        # Instructions for the user
-        print("Welcome to keyword search. Please follow the prompts to search "
-              "for specific event types and descriptions.")
-        print(
-    "You are required to enter a keyword to filter event descriptions.")
-        print("Examples of keywords: 'saved', 'deleted', 'CPU', 'Game', "
-              "'presentation'.")
-        print("You also have the option to view previously searched events and"
-              " keywords during the session.")
+        # Count warnings per day
+        counts_by_date = {}
+        for date in dates:
+            counts_by_date[date] = counts_by_date.get(date, 0) + 1
 
-        while True:
-            try:
-                # Ask the user what kind of event they want to search for
-                event_type = input(
-                    "Enter the event type you want to search for "
-                    "(e.g., Error, Update, Warning, Security, Files): "
-                ).strip()
+        # Prepare data for timeline
+        sorted_dates = list(sorted(counts_by_date.keys()))
+        counts = [counts_by_date[date] for date in sorted_dates]
+       
+         # Plot timeline
+        plt.figure(figsize=(12, 6))
+        plt.plot(sorted_dates, counts, marker='o', color='orange')
+        plt.xlabel("Date")
+        plt.ylabel("Number of Warnings")
+        plt.title("Warning Events Over Time")
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
 
-                # Ask the user for a keyword 
-                while True:
-                    keyword = input(
-    "Enter keyword to filter descriptions:"
-).strip()
-                    if keyword:
-                        break
-                    else:
-                        print("Keyword is required. Enter a valid keyword.")
-                
-                # Add the keyword to keyword history (avoid duplicates)
-                if keyword not in keyword_history:
-                    keyword_history.append(keyword)
+# Example main code
+log_file_path = "spring2024_system_events.txt"
+pattern_length = 3
 
-                with open(file_path, 'r') as file:
-                    event_found = False
-                    print("\nSearch Results:")
+# Ensure you define the `patterns` and `timestamps` dictionaries before running this function
+patterns = id_warning_patterns(log_file_path, pattern_length=pattern_length)
 
-                    for line in file:
-                        parts = line.split('|')
-                        
-                        if (
-                            len(parts) > 3 
-                            and event_type.lower() in parts[1].strip().lower()
-                        ):
-                            # Extract the event details
-                            date_time = parts[0].strip()  
-                            event = parts[1].strip()  
-                            event_id = parts[2].strip() 
-                            description = parts[3].strip()  
-                            
-                            if keyword.lower() not in description.lower():
-                                continue
-                            event_details = (
-    f"{date_time} | {event} | {event_id} | {description}"
-)
-                            # Print the matching event
-                            print(f"\n{event_details}")
-                            event_found = True
-                            
-                            # Add the event to the event history
-                            if event_details not in event_history:
-                                event_history.append(event_details)
-                    print(
-    "\nNo events found matching." if not event_found else ""
-)
+timestamps = [
+    "2024-01-01 01:33:00",
+    "2024-01-01 07:54:00",
+    "2024-01-01 10:23:00",
+    "2024-01-02 11:02:00",
+    "2024-01-03 04:30:00",
+    "2024-01-03 08:53:00",
+     ]
 
-                # Ask the user if they want to see 
-                # previously searched events and keywords
-                view_history = input(
-    "\nDo you want to view previously searched events and keywords? (yes/no): "
-).strip().lower()
-                if view_history == 'yes':
-                    if keyword_history:
-                        print("\nPreviously Searched Keywords:")
-                        print(", ".join(keyword_history))
-                    else:
-                        print("\nNo previously searched keywords found")
-                    
-                    if event_history:
-                        print("\nPreviously Viewed Events:")
-                        for event in event_history:
-                            print(event)
-                    else:
-                        print("\nNo previously viewed events found")
-                    
-
-                # Ask the user if they want to search again or exit
-                continue_search = input(
-                    "\nDo you want to search again? (yes/no): "
-                ).strip().lower()
-                if continue_search != 'yes':
-                    print("Exiting search.")
-                    break
-            
-            except FileNotFoundError:
-                print(f"Error: The file '{file_path}' was not found.")
-                break  
-            except Exception as e:
-                print(f"An error occurred: {e}")
-                break  
+# Visualize results
+visualize_warning_patterns(patterns, timestamps)
 
 
     def event_sequence(self, file_path):
-        """A function to find the most common order of system events within the txt file.  
-            
+        """A function to find the most common order of system events within the
+        txt file.  
+        
         Args: 
-            file_path (str): name of the file that will be read to get the system events information for. 
+            file_path (str): name of the file that will be read to get the
+                system events information for. 
             
         Returns:
             The top three most common sequences of events as strings. 
-                Format (note: is along the lines of what looking to output, numbers/sequences below are not exact): 
-                "Top 3 most common sequences:
-                (event1, event2, event3): 28
-                (event6, event3, event2): 16
-                (event1, event2): 15"
+                Format (note: is along the lines of what looking to output,
+                    numbers/sequences below are not exact): 
+                        "Top 3 most common sequences:
+                        (event1, event2, event3): 28
+                        (event6, event3, event2): 16
+                        (event1, event2): 15"
             
         Side effects: 
-            Adds/modifies the keys and values of "count" dictionary (mutable) when seeing what sequences of events
+            Adds/modifies the keys and values of "count" dictionary (mutable)
+                when seeing what sequences of events
                 have occurred.  
+            Prints the most common event sequences to the console as tuples,
+                with the number of occurrences (str) displayed in the same line.
 
         Attribution:
-            The Python Software Foundation (2024) 4.3. The range() Function (Version 2) [Source code].
+            The Python Software Foundation (2024) 4.3. The range() Function
+                (Version 2) [Source code].
                 https://umd.instructure.com/courses/1374047/assignments/syllabus.
-            (link accessed/found through "4. More Control Flow Tools" link in "Prerequisite knowledge" module in
+            (link accessed/found through "4. More Control Flow Tools" link in
+                "Prerequisite knowledge" module in
                 Professor Aric Bill's INST326 Fall 2024 syllabus)
             
             Used range() function under section 4.3 from following examples:
@@ -734,11 +674,14 @@ class SystemEventsManager:
 
             My modifications:
                 "for len_of_sequence in range(2, len(entire_descriptions))"
-                and "for start_point in range(0, len(entire_descriptions) - len_of_sequence)" - combined both source code
-                    snippets to include searching within a range for both regular numeric values (2) and the length of a
-                    list (len(entire_descriptions)).
+                and "for start_point in range(0, len(entire_descriptions)
+                    - len_of_sequence)" - combined both source code
+                        snippets to include searching within a range for both
+                        regular numeric values (2) and the length of a
+                        list (len(entire_descriptions)).
                 
-            More information about why/how used source code in program in PDF documentation for final submission.
+            More information about why/how used source code in program in PDF
+                documentation for final submission.
             """
             
         # will include all the event descriptions/entries within the file to be
@@ -870,30 +813,32 @@ class SystemEventsManager:
             # add those pairs to what we're going to be outputting
             result_content += f"{individual_sequence}: {num_occurences}\n"
 
-        return result_heading + result_content
+        end_result = print(result_heading + result_content)
+
+        return end_result
     
-    
-    # if __name__ == "__main__":
-    #     file_path = "spring2024_system_events.txt"
-         
-    #     result = event_sequence(file_path)
-    #     print(result)
-
-
-    # NEED TO FIX ^ ABOVE CODE RETURNS AN (IF COMMENTED OUT, RUNS, BUT NO
-    # OUTPUT TO TERMINAL)
-    
-    
-    def pandas_operations(self):
-        print("Successfully printed pandas_operations")
-
-
-    def visualize_warning_patterns(self):
-        print("Successfully printed visualize_warning_patterns")
-
 
     def main_menu(self, file_path, path):
-        "temporary docstring"
+        """A function for creating an output that allows the user to select a
+            function that they want to run by inputting a corresponding number
+            for that function. Makes other program functions an instance that
+            can be called in this main_menu function (in order to run the
+            corresponding function once the user has requested it).
+            
+        Args:
+            file_path (str): name of the file that will be read to get the
+                system events information for. One of two arguments for the 
+                system events file name since the majority of the functions 
+                take file_path as an argument.
+            path (str): name of the file that will be read to get the
+                system events information for. One of two arguments for the 
+                system events file name since the only two of the functions 
+                (summary(), activity()) take path as an argument.
+                
+        Side effects: 
+            Prints in the console a welcome message and the functions that the
+                user can select from.
+        """
         
         print("Welcome to Analyzing System Events!")
         
@@ -959,7 +904,8 @@ class SystemEventsManager:
                   (1, 2, 3, 4, 5, 6, 7, 8).")
 
 def parse_args(arglist):
-    """ Processes command line arguments. 
+    """Processes command line arguments. 
+    
     Args:
         arglist (list of str): arguments from the command line.
 
