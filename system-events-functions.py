@@ -324,8 +324,9 @@ class SystemEventsManager:
         month_dict = {"month_count": month_count}
         df = pd.DataFrame(month_dict)
 
-        if histogram == True:
-            return df.hist("month_count")
+        if histogram:
+            df.hist("month_count")
+            plt.show()
         else:
             return df
     
