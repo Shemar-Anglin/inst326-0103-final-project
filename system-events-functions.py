@@ -5,7 +5,7 @@ import sys
 import matplotlib.pyplot as plt
 
 class SystemEventsManager:
-
+    """temporary docstring"""
     # NEED TO REMEMBER TO ADD SELF AS PARAMETERS TO ALL FUNCTIONS IN ORDER FOR MAIN MENU FUNCTION TO WORK
     
     def manage_system_events(self, file_path, change_log_file=None):
@@ -508,9 +508,9 @@ class SystemEventsManager:
                 break  
                             
                             
-                    
+
         
-    def id_warning_patterns(file_path, pattern_length=3):
+    def id_warning_patterns(self, file_path, pattern_length=3):
         """  
         Identifies patterns of warning events in the log file.
 
@@ -554,20 +554,20 @@ class SystemEventsManager:
         significant_patterns = {pattern: count for pattern, count in warning_patterns.items() if count > 1}
         return significant_patterns
 
-log_file_path = "spring2024_system_events.txt"
-pattern_length = 3
+    log_file_path = "spring2024_system_events.txt"
+    pattern_length = 3
 
-# Call function with parsed arguments 
-patterns = id_warning_patterns(log_file_path, pattern_length=pattern_length)
+    # Call function with parsed arguments 
+    patterns = id_warning_patterns(log_file_path, pattern_length=pattern_length)
 
-# Display patterns using sequence unpacking and f-strings
-for i, (pattern, count) in enumerate(patterns.items(), start=1):
-    events = " -> ".join(f"{event[1]}" for event in pattern) 
-    print(f"{i}. Pattern: {events} | Occurrences: {count}")
+    # Display patterns using sequence unpacking and f-strings
+    for i, (pattern, count) in enumerate(patterns.items(), start=1):
+        events = " -> ".join(f"{event[1]}" for event in pattern) 
+        print(f"{i}. Pattern: {events} | Occurrences: {count}")
 
 
 
-    def visualize_warning_patterns(patterns, timestamps):
+    def visualize_warning_patterns(self, patterns, timestamps):
         """
         Visualizes warning patterns as a bar chart and warning trends over time as a timeline chart.
 
@@ -614,24 +614,24 @@ for i, (pattern, count) in enumerate(patterns.items(), start=1):
         plt.tight_layout()
         plt.show()
 
-# Example main code
-log_file_path = "spring2024_system_events.txt"
-pattern_length = 3
+    # Example main code
+    log_file_path = "spring2024_system_events.txt"
+    pattern_length = 3
 
-# Ensure you define the `patterns` and `timestamps` dictionaries before running this function
-patterns = id_warning_patterns(log_file_path, pattern_length=pattern_length)
+    # Ensure you define the `patterns` and `timestamps` dictionaries before running this function
+    patterns = id_warning_patterns(log_file_path, pattern_length=pattern_length)
 
-timestamps = [
-    "2024-01-01 01:33:00",
-    "2024-01-01 07:54:00",
-    "2024-01-01 10:23:00",
-    "2024-01-02 11:02:00",
-    "2024-01-03 04:30:00",
-    "2024-01-03 08:53:00",
-     ]
+    timestamps = [
+        "2024-01-01 01:33:00",
+        "2024-01-01 07:54:00",
+        "2024-01-01 10:23:00",
+        "2024-01-02 11:02:00",
+        "2024-01-03 04:30:00",
+        "2024-01-03 08:53:00",
+        ]
 
-# Visualize results
-visualize_warning_patterns(patterns, timestamps)
+    # Visualize results
+    visualize_warning_patterns(patterns, timestamps)
 
 
     def event_sequence(self, file_path):
